@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import warnings 
 warnings.filterwarnings("ignore")
 
@@ -15,15 +17,32 @@ load_dotenv()
 TOKEN = os.getenv("CANVAS_API_TOKEN")
 BASE_URL = os.getenv("BASE_URL")
 
+if not TOKEN or not BASE_URL:
+    print("Error: CANVAS_API_TOKEN and BASE_URL must be set in the .env file.")
+    exit(1)
+
 # Bearer token for authentication
 headers = {
     "Authorization": f"Bearer {TOKEN}"
 }
 
+def usage():
+    print("Usage: ./canvas <command>")
+    print("Commands:")
+    print("  help        -  Show this help message")
+    print("  test        -  Test connection to Canvas")
+    print("  courses     -  List favorite courses")
+    print("  assignments -  List assignments for a course")
+    print("  todo        -  List Todo items")
+
 def test_connection():
     url = f"{BASE_URL}/users/self"
 
-    response = requests.get(url, headers=headers)
+    try:
+        response = requests.get(url, headers=headers)
+    except requests.RequestException as e:
+        print(f"Error connecting to Canvas")
+        return
 
     if response.status_code == 200:
         user = response.json()
@@ -32,12 +51,15 @@ def test_connection():
         print (f"ID: {user['id']}")
     else:
         print(f"Connection failed with status code: {response.status_code}")
-        print(response.text)
 
 def get_courses():
     url = f"{BASE_URL}/users/self/favorites/courses"
 
-    response = requests.get(url, headers=headers)
+    try:
+        response = requests.get(url, headers=headers)
+    except requests.RequestException as e:
+        print(f"Error connecting to Canvas")
+        return
 
     if response.status_code == 200:
         courses = response.json()
@@ -46,11 +68,17 @@ def get_courses():
             name = course.get("name")
             course_id = course.get("id")
             print(f"- {name} (ID: {course_id})")
+    else:
+        print(f"Failed to retrieve courses with status code: {response.status_code}")
 
 def get_assignments(course_id):
     url = f"{BASE_URL}/courses/{course_id}/assignments"
 
-    response = requests.get(url, headers=headers)
+    try:
+        response = requests.get(url, headers=headers)
+    except requests.RequestException as e:
+        print(f"Error connecting to Canvas")
+        return
 
     if response.status_code == 200:
         assignments = response.json()
@@ -59,11 +87,17 @@ def get_assignments(course_id):
             assignment_name = assignment.get("name")
             due = assignment.get("due_at")
             print(f"- {assignment_name} (Due: {due})")
+    else:       
+        print(f"Failed to retrieve assignments with status code: {response.status_code}")
 
 def get_todo():
     url = f"{BASE_URL}/users/self/todo"
 
-    response = requests.get(url, headers=headers)
+    try:
+        response = requests.get(url, headers=headers)
+    except requests.RequestException as e:
+        print(f"Error connecting to Canvas")
+        return
 
     if response.status_code == 200:
         todo_items = response.json()
@@ -73,7 +107,8 @@ def get_todo():
             name = assignment.get("name")
             course = item.get("context_name")
             print(f"{course} - {name}")
-
+    else:
+        print(f"Failed to retrieve ToDo items with status code: {response.status_code}")
 
 def main():
     parser = argparse.ArgumentParser(description="Canvas CLI Tool")
@@ -89,11 +124,19 @@ def main():
         get_courses()
     elif args.command == "assignments":
         course_id = input("Enter Course ID: ")
+
+        if not course_id.isdigit():
+            print("Invalid Course ID. Please enter a numeric value.")
+            return
+        
         get_assignments(course_id)
     elif args.command == "todo":
         get_todo()
+    elif args.command == "help":
+        usage()
     else:        
         print(f"Unknown command: {args.command}")
+        usage()
 
 
 if __name__ == "__main__":
