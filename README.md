@@ -79,3 +79,6 @@ Assignments for 44253:
 This project was a fun experience, especially becuase it was something I could actually find useful in my day to day. The project helped me learn how to interact with a real API and integrate it into my CLI tool. I also gained expereince in using the Python libarries to get HTTP requests, handle token authentication, and parse JSON responses. Then I just had to use argparse to take different commands. 
 
 The biggest challenge was understanding the Canvas API. I would try to get objects or fields and would receive errors or empty attributes. I had to dig through some documentation or just look up how to get to access the fields I wanted. Once I learned how to get one field, it was a pretty easy process to get more implemented. If I had more time I would implement more of the grades, calendar, submission bot, and more. I would also make the output look more appealing and style it. 
+
+## Demo GIF
+![Canvas CLI Demo](demo.gif)
